@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: blog_user
+      POSTGRES_PASSWORD: blog_pass
+      POSTGRES_DB: blog_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  service_user:
+    build:
+      context: . 
+      dockerfile: service_user/Dockerfile
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://blog_user:blog_pass@db:5432/blog_db
+    ports:
+      - "5001:5001"
+
+  service_post:
+    build:
+      context: . 
+      dockerfile: service_post/Dockerfile
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://blog_user:blog_pass@db:5432/blog_db
+    ports:
+      - "5002:5002"
+
+volumes:
+  db-data:
