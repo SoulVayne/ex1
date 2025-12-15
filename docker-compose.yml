@@ -9,31 +9,38 @@ services:
       POSTGRES_PASSWORD: blog_pass
       POSTGRES_DB: blog_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
 
   service_user:
     build:
-      context: . 
+      context: .
       dockerfile: service_user/Dockerfile
     depends_on:
       - db
     environment:
       DATABASE_URL: postgresql://blog_user:blog_pass@db:5432/blog_db
-    ports:
-      - "5001:5001"
 
   service_post:
     build:
-      context: . 
+      context: .
       dockerfile: service_post/Dockerfile
     depends_on:
       - db
     environment:
       DATABASE_URL: postgresql://blog_user:blog_pass@db:5432/blog_db
+
+  api_gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
     ports:
-      - "5002:5002"
+      - "80:80"
+    depends_on:
+      - service_user
+      - service_post
+
 
 volumes:
   db-data:

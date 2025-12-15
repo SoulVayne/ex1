@@ -10,8 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
-@app.before_first_request
-def create_tables():
+with app.app_context():
     Base.metadata.create_all(bind=engine)
 
 @app.route("/posts", methods=["GET"])
@@ -36,7 +35,7 @@ def create_post():
     if not data.get("title") or not data.get("content") or not data.get("user_id"):
         abort(400)
     session = SessionLocal()
-    u = session.query(User).get(data["user_id"])
+    u = session.get(User, data["user_id"])
     if not u:
         session.close()
         abort(400, description="user_id not found")

@@ -10,10 +10,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
-@app.before_first_request
-def create_tables():
-    Base.metadata.create_all(bind=engine)
-
 @app.route("/users", methods=["GET"])
 def get_users():
     session = SessionLocal()
@@ -46,4 +42,6 @@ def get_user(user_id):
     return jsonify({"id": u.id, "username": u.username, "email": u.email})
 
 if __name__ == "__main__":
+    with app.app_context():
+        Base.metadata.create_all(bind=engine)
     app.run(host="0.0.0.0", port=5001)
